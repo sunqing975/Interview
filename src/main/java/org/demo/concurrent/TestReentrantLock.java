@@ -12,7 +12,8 @@ import java.util.stream.IntStream;
 
 import static org.demo.concurrent.LoggerUtils.get;
 
-// --add-opens java.base/java.util.concurrent=ALL-UNNAMED --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
+// --add-opens java.base/java.util.concurrent=ALL-UNNAMED
+// --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
 public class TestReentrantLock {
     static final MyReentrantLock LOCK = new MyReentrantLock(true);
 
@@ -23,6 +24,7 @@ public class TestReentrantLock {
 
     public static void main(String[] args) throws InterruptedException, IOException {
         learnLock();
+        //fairVsUnfair();
     }
 
     private static void learnLock() throws InterruptedException {
@@ -36,18 +38,21 @@ public class TestReentrantLock {
         new MyThread(() -> {
             LOCK.lock();
             get("t").debug("acquire lock...");
+            //sleep1s();
         }, "t2").start();
 
         Thread.sleep(100);
         new MyThread(() -> {
             LOCK.lock();
             get("t").debug("acquire lock...");
+            //sleep1s();
         }, "t3").start();
 
         Thread.sleep(100);
         new MyThread(() -> {
             LOCK.lock();
             get("t").debug("acquire lock...");
+            //sleep1s();
         }, "t4").start();
     }
 
@@ -127,6 +132,7 @@ public class TestReentrantLock {
         public String toString() {
             StringBuilder sb = new StringBuilder(512);
             String queuedInfo = getQueuedInfo();
+
             List<String> all = new ArrayList<>();
             all.add(String.format("| owner[%s] state[%s]", this.getOwner(), this.getState()));
             all.add(String.format("| blocked queue %s", queuedInfo));
@@ -141,7 +147,7 @@ public class TestReentrantLock {
                 sb.append(space).append("|\n");
             }
             sb.deleteCharAt(sb.length() - 1);
-            String line1 = IntStream.range(0, maxLength ).mapToObj(i -> "-").collect(Collectors.joining(""));
+            String line1 = IntStream.range(0, maxLength).mapToObj(i -> "-").collect(Collectors.joining(""));
             sb.insert(0, String.format("%n| Lock %s|%n", line1));
             maxLength += 6;
             String line3 = IntStream.range(0, maxLength).mapToObj(i -> "-").collect(Collectors.joining(""));
@@ -165,14 +171,19 @@ public class TestReentrantLock {
         }
 
         private String getWaitingInfo(Condition condition) {
+            sleep1s();
             List<String> result = new ArrayList<>();
             try {
                 Field firstWaiterField = AbstractQueuedSynchronizer.ConditionObject.class.getDeclaredField("firstWaiter");
                 Class<?> conditionNodeClass = Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionNode");
+                //Class<?> conditionNodeClass = Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject");
                 Class<?> nodeClass = Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer$Node");
                 Field waiterField = nodeClass.getDeclaredField("waiter");
+                //Field waiterField = nodeClass.getDeclaredField("thread");
                 Field statusField = nodeClass.getDeclaredField("status");
+                //Field statusField = nodeClass.getDeclaredField("waitStatus");
                 Field nextWaiterField = conditionNodeClass.getDeclaredField("nextWaiter");
+                //Field nextWaiterField = conditionNodeClass.getDeclaredField("next");
                 firstWaiterField.setAccessible(true);
                 waiterField.setAccessible(true);
                 statusField.setAccessible(true);
@@ -183,6 +194,7 @@ public class TestReentrantLock {
                     Object status = statusField.get(fistWaiter);
                     result.add(String.format("([%s]%s)", status, waiter));
                     fistWaiter = nextWaiterField.get(fistWaiter);
+                    System.out.println(result);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -191,13 +203,16 @@ public class TestReentrantLock {
         }
 
         private String getQueuedInfo() {
+            sleep1s();
             List<String> result = new ArrayList<>();
             try {
                 Field syncField = ReentrantLock.class.getDeclaredField("sync");
                 Field headField = AbstractQueuedSynchronizer.class.getDeclaredField("head");
                 Class<?> nodeClass = Class.forName("java.util.concurrent.locks.AbstractQueuedSynchronizer$Node");
                 Field waiterField = nodeClass.getDeclaredField("waiter");
+                //Field waiterField = nodeClass.getDeclaredField("thread");
                 Field statusField = nodeClass.getDeclaredField("status");
+                //Field statusField = nodeClass.getDeclaredField("waitStatus");
                 Field nextField = nodeClass.getDeclaredField("next");
                 syncField.setAccessible(true);
                 AbstractQueuedSynchronizer sync = (AbstractQueuedSynchronizer) syncField.get(this);
@@ -211,10 +226,12 @@ public class TestReentrantLock {
                     Object status = statusField.get(head);
                     result.add(String.format("({%s}%s)", status, waiter));
                     head = nextField.get(head);
+                    System.out.println(result);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             return String.join("->", result);
         }
     }
