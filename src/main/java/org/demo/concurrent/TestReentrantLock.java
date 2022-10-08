@@ -171,7 +171,6 @@ public class TestReentrantLock {
         }
 
         private String getWaitingInfo(Condition condition) {
-            sleep1s();
             List<String> result = new ArrayList<>();
             try {
                 Field firstWaiterField = AbstractQueuedSynchronizer.ConditionObject.class.getDeclaredField("firstWaiter");
@@ -194,7 +193,7 @@ public class TestReentrantLock {
                     Object status = statusField.get(fistWaiter);
                     result.add(String.format("([%s]%s)", status, waiter));
                     fistWaiter = nextWaiterField.get(fistWaiter);
-                    System.out.println(result);
+                    //System.out.println(result);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -203,6 +202,8 @@ public class TestReentrantLock {
         }
 
         private String getQueuedInfo() {
+            // 加上两秒这个是因为这边执行太快，可能导致线程并未创建成功，也就无法获取。（猜测）
+            sleep1s();
             sleep1s();
             List<String> result = new ArrayList<>();
             try {
@@ -226,7 +227,7 @@ public class TestReentrantLock {
                     Object status = statusField.get(head);
                     result.add(String.format("({%s}%s)", status, waiter));
                     head = nextField.get(head);
-                    System.out.println(result);
+                    //System.out.println(result);
                 }
             } catch (Exception e) {
                 e.printStackTrace();
