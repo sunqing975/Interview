@@ -4,9 +4,9 @@ import org.openjdk.jcstress.annotations.*;
 import org.openjdk.jcstress.infra.results.II_Result;
 
 // 有序性例子
-// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t day02.threadsafe.Reordering.Case1
-// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t day02.threadsafe.Reordering.Case2
-// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t day02.threadsafe.Reordering.Case3
+// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t org.demo.concurrent.threadsafe.Reordering.Case1
+// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t org.demo.concurrent.threadsafe.Reordering.Case2
+// java -XX:+UnlockDiagnosticVMOptions -XX:+LogCompilation -jar jcstress.jar -t org.demo.concurrent.threadsafe.Reordering.Case3
 public class Reordering {
     @JCStressTest
     @Outcome(id = {"0, 0", "1, 1", "0, 1"}, expect = Expect.ACCEPTABLE, desc = "ACCEPTABLE")

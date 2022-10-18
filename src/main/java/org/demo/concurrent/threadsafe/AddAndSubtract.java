@@ -8,7 +8,6 @@ import java.util.concurrent.CountDownLatch;
 // 原子性例子
 
 /**
-
  t1 10
  0: getstatic
                  t2
@@ -21,21 +20,20 @@ import java.util.concurrent.CountDownLatch;
  4: iadd
  5: putstatic
  15
-
-
-
  */
 public class AddAndSubtract {
 
     static volatile int balance = 10;
 
     public static void subtract() {
+        // 在此设置断点
         int b = balance;
         b -= 5;
         balance = b;
     }
 
     public static void add() {
+        // 在此设置断点
         int b = balance;
         b += 5;
         balance = b;

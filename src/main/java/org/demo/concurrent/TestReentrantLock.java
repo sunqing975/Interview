@@ -15,6 +15,7 @@ import static org.demo.concurrent.LoggerUtils.get;
 // --add-opens java.base/java.util.concurrent=ALL-UNNAMED
 // --add-opens java.base/java.util.concurrent.locks=ALL-UNNAMED
 public class TestReentrantLock {
+    // MyReentrantLock ture 表示公平锁，严格按照先进先出原则
     static final MyReentrantLock LOCK = new MyReentrantLock(true);
 
     static Condition c1 = LOCK.newCondition("c1");
@@ -23,7 +24,9 @@ public class TestReentrantLock {
     static volatile boolean stop = false;
 
     public static void main(String[] args) throws InterruptedException, IOException {
+        // 学习等待队列(条件队列)，同步队列(阻塞队列) 看 AbstractQueuedSynchronizer 源码，jdk8 与 jdk 17 源码改变
         learnLock();
+        // 测试公平锁
         //fairVsUnfair();
     }
 
@@ -31,28 +34,29 @@ public class TestReentrantLock {
         System.out.println(LOCK);
         new MyThread(() -> {
             LOCK.lock();
+            //断点调试时，鼠标右击选择Thread
             get("t").debug("acquire lock...");
         }, "t1").start();
 
         Thread.sleep(100);
         new MyThread(() -> {
             LOCK.lock();
+            //断点调试时，鼠标右击选择Thread
             get("t").debug("acquire lock...");
-            //sleep1s();
         }, "t2").start();
 
         Thread.sleep(100);
         new MyThread(() -> {
             LOCK.lock();
+            //断点调试时，鼠标右击选择Thread
             get("t").debug("acquire lock...");
-            //sleep1s();
         }, "t3").start();
 
         Thread.sleep(100);
         new MyThread(() -> {
             LOCK.lock();
+            //断点调试时，鼠标右击选择Thread
             get("t").debug("acquire lock...");
-            //sleep1s();
         }, "t4").start();
     }
 
@@ -170,6 +174,11 @@ public class TestReentrantLock {
             }
         }
 
+        /**
+         * 注释部分可以使用Java8
+         * @param condition
+         * @return
+         */
         private String getWaitingInfo(Condition condition) {
             List<String> result = new ArrayList<>();
             try {
@@ -182,7 +191,7 @@ public class TestReentrantLock {
                 Field statusField = nodeClass.getDeclaredField("status");
                 //Field statusField = nodeClass.getDeclaredField("waitStatus");
                 Field nextWaiterField = conditionNodeClass.getDeclaredField("nextWaiter");
-                //Field nextWaiterField = conditionNodeClass.getDeclaredField("next");
+                //Field nextWaiterField = conditionNodeClass.getDeclaredField("firstWaiter");
                 firstWaiterField.setAccessible(true);
                 waiterField.setAccessible(true);
                 statusField.setAccessible(true);
@@ -200,7 +209,10 @@ public class TestReentrantLock {
             }
             return String.join("->", result);
         }
-
+        /**
+         * 注释部分可以使用Java8
+         * @return
+         */
         private String getQueuedInfo() {
             // 加上两秒这个是因为这边执行太快，可能导致线程并未创建成功，也就无法获取。（猜测）
             sleep1s();
